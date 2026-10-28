@@ -1,33 +1,26 @@
 # Explainable Credit Card Fraud Detection Using a Deep Learning Ensemble
 
-A research-inspired implementation of an explainable credit card fraud detection framework combining **CNN, RNN, LSTM, and GNN models** with weighted aggregation, confidence-aware selection, a meta-learner, and SHAP-based explanations.
+A research-inspired implementation of an explainable credit card fraud detection framework combining **CNN, RNN, LSTM, and GNN models** with weighted aggregation, confidence-aware selection, an MLP meta-learner, and SHAP-based explanations.
 
-The project explores how deep learning ensembles and explainable AI can help detect fraudulent transactions in highly imbalanced financial datasets.
+This project explores deep learning ensembles and explainable AI for detecting fraudulent transactions in highly imbalanced financial datasets.
 
 ## Project Overview
 
-Credit card fraud detection is a challenging binary classification problem because fraudulent transactions represent only a small fraction of all transactions. A useful model must identify fraudulent activity while limiting false alarms on legitimate transactions.
+Credit card fraud detection is a challenging binary classification problem because fraudulent transactions represent only a small fraction of all transactions. Models must identify suspicious transactions while minimizing false alarms on legitimate transactions.
 
-This project implements a research-inspired ensemble framework using multiple neural network architectures and a confidence-aware combination mechanism. It also uses SHAP to investigate which input features influence model predictions.
+This project implements a research-inspired ensemble framework that combines multiple neural network architectures and a confidence-aware prediction mechanism. SHAP is used to investigate the features influencing model predictions.
 
-**Key highlights**
-- Multiple deep learning models: CNN, RNN, LSTM, and GNN.
-- DOWA- and IOWA-inspired weighted aggregation.
+### Key Features
+
+- CNN, RNN, LSTM, and GNN model architectures.
+- DOWA-inspired and IOWA-inspired weighted aggregation.
 - Confidence-aware selection between model branches.
-- A multilayer perceptron (MLP) meta-learner.
+- MLP-based meta-learning for final predictions.
 - Class-imbalance handling using weighted loss.
-- Validation-based decision threshold selection.
-- Model evaluation using precision, recall, F1-score, ROC-AUC, and PR-AUC.
+- Validation-based decision threshold tuning.
+- Evaluation using precision, recall, F1-score, ROC-AUC, and PR-AUC.
 - SHAP-based feature importance analysis.
-
-## Objectives
-
-1. Implement a research-inspired deep learning ensemble for fraud detection.
-2. Evaluate individual models and compare them with the ensemble.
-3. Address class imbalance in transaction data.
-4. Investigate the effect of decision threshold tuning on fraud detection.
-5. Explain model predictions using SHAP.
-6. Explore the trade-off between detecting fraudulent transactions and reducing false positives.
+- Visualizations for model comparison and threshold evaluation.
 
 ## Tech Stack
 
@@ -41,92 +34,90 @@ This project implements a research-inspired ensemble framework using multiple ne
 
 ## Dataset
 
-This project uses the **Credit Card Fraud Detection dataset** from Kaggle.
+This project uses the [Credit Card Fraud Detection dataset on Kaggle](https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud).
 
-Dataset link: https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud
+The dataset contains 284,807 transactions, including 492 fraudulent transactions.
 
-The dataset contains 284,807 transactions, including 492 fraudulent transactions, making it highly imbalanced.
-
-The dataset includes anonymized transaction features (`V1`–`V28`), transaction amount, transaction time, and a binary target column named `Class`.
+The dataset includes anonymized transaction features (`V1`–`V28`), transaction time, transaction amount, and a target column named `Class`.
 
 - `Class = 0`: Legitimate transaction
 - `Class = 1`: Fraudulent transaction
 
-### Dataset access
+### Dataset Setup
 
 The dataset is not included in this repository.
 
 To run the notebook:
-1. Download `creditcard.csv` from Kaggle.
-2. Open the notebook in Google Colab.
-3. Run the dataset upload cell.
-4. Select the downloaded CSV file when prompted.
 
-This approach avoids committing the dataset to GitHub.
+1. Download `creditcard.csv` from Kaggle.
+2. Open `fraud_detection_ensemble.ipynb` in Google Colab.
+3. Run the dataset upload cell.
+4. Upload the downloaded CSV file when prompted.
+5. Execute the notebook cells in order.
+
+This keeps the repository lightweight and avoids redistributing the dataset.
 
 ## Methodology
 
-### 1. Data preprocessing
+### 1. Data Preprocessing
 
-- Load the dataset into a Pandas DataFrame.
+- Load and inspect the dataset using Pandas.
 - Select the features used by the implementation.
 - Split the data into training, validation, and test sets.
-- Fit preprocessing transformations on the training set to avoid data leakage.
+- Fit preprocessing transformations on training data to prevent data leakage.
 - Handle class imbalance using a weighted loss function.
 
-### 2. Feature selection
+### 2. Feature Selection
 
 The implementation uses the following ten features based on the feature ranking discussed in the reference paper:
 
 `V14`, `V10`, `V4`, `V17`, `V12`, `V11`, `V16`, `V8`, `V3`, `V1`
 
-### 3. Individual deep learning models
+### 3. Deep Learning Models
 
-The framework includes four model architectures:
-
-| Model | Purpose |
+| Model | Role |
 |---|---|
 | CNN | Learns local patterns in transaction feature representations. |
 | RNN | Learns sequential-style patterns in the input representation. |
-| LSTM | Uses gated recurrent units to model dependencies in the input representation. |
-| GNN | Learns representations using relationships between transactions in a constructed feature-space graph. |
+| LSTM | Models dependencies using gated recurrent units. |
+| GNN | Learns representations from a graph constructed in feature space. |
 
-### 4. Weighted aggregation
+### 4. Weighted Aggregation
 
 Two aggregation mechanisms are implemented:
 
 - **DOWA-inspired aggregation:** Combines predictions using an ordered weighted aggregation approach.
 - **IOWA-inspired aggregation:** Uses importance-weighted aggregation to combine model outputs.
 
-These mechanisms help combine predictions from different model branches.
+These mechanisms combine predictions from different model branches.
 
-### 5. Confidence-aware selection
+### 5. Confidence-Aware Selection
 
-A confidence-based mechanism estimates prediction confidence and selects between the aggregated branch outputs.
+A confidence-based mechanism estimates prediction confidence and selects between aggregated branch outputs.
 
-The selected output, together with additional branch outputs, is passed to the meta-learner.
+The selected output and additional branch predictions are passed to the meta-learner.
 
-### 6. Meta-learner
+### 6. Meta-Learner
 
-A multilayer perceptron (MLP) combines the outputs of the base-model branches to produce the final fraud probability.
+A multilayer perceptron (MLP) combines outputs from the model branches to generate the final fraud probability.
 
-### 7. Decision threshold tuning
+### 7. Decision Threshold Tuning
 
-Instead of relying only on the default classification threshold of 0.5, the implementation selects a threshold using the validation precision–recall curve to optimize F1-score.
+The default classification threshold of 0.5 may produce too many false positives in an imbalanced dataset.
 
-Threshold tuning changes the balance between precision and recall. It does not change the ROC-AUC or PR-AUC calculated from the same prediction scores.
+This implementation selects a decision threshold using the validation precision–recall curve to optimize F1-score. Threshold tuning changes the precision–recall trade-off without changing ROC-AUC or PR-AUC when the underlying prediction scores remain unchanged.
 
 ### 8. Explainability with SHAP
 
-SHAP is used to investigate feature contributions to model predictions.
+SHAP is used to investigate feature contributions to model predictions. Feature-importance visualizations help interpret which inputs influence the trained model's fraud predictions.
 
-Feature importance visualizations help interpret which input features influence the model's fraud predictions. These explanations describe the trained implementation and should not be interpreted as proof of causation.
+These explanations describe model behavior and should not be interpreted as evidence of causation.
 
 ## Results
 
-The following results were obtained from the implementation discussed in this project. They should be reproduced from the final notebook before being treated as definitive results.
+The following metrics were obtained from the implementation's evaluation outputs.
 
-### Individual model and ensemble comparison
+### Model Comparison
 
 Metrics at the default classification threshold of 0.5:
 
@@ -138,9 +129,13 @@ Metrics at the default classification threshold of 0.5:
 | GNN | 0.9712 | 0.0506 | 0.8878 | 0.0958 | 0.9659 | 0.5235 |
 | Ensemble | 0.9755 | 0.0591 | 0.8878 | 0.1108 | 0.9731 | 0.6339 |
 
-Accuracy alone is not sufficient for evaluating fraud detection because the dataset is highly imbalanced. Precision, recall, F1-score, and PR-AUC provide additional insight into minority-class performance.
+Accuracy alone is not sufficient for evaluating fraud detection because legitimate transactions dominate the dataset. Precision, recall, F1-score, and PR-AUC provide additional insight into minority-class performance.
 
-### Effect of threshold tuning
+### Model Comparison Visualization
+
+![Model comparison](results/model_comparison.png)
+
+### Effect of Threshold Tuning
 
 | Metric | Threshold = 0.5 | Validation-tuned threshold ≈ 0.9554 |
 |---|---:|---:|
@@ -151,45 +146,38 @@ Accuracy alone is not sufficient for evaluating fraud detection because the data
 
 At the validation-selected threshold, the model identified 71 of the 98 fraudulent transactions in the test set and produced 13 false positives.
 
-The results illustrate the trade-off between detecting more fraud and reducing false alarms. The higher threshold improves precision and F1-score but reduces recall, so it also misses more fraudulent transactions.
+The higher threshold substantially improved precision and F1-score but reduced recall, meaning more fraudulent transactions were missed. The appropriate threshold depends on the relative costs of false positives and missed fraud.
 
-ROC-AUC and PR-AUC remain unchanged when only the decision threshold changes, provided the underlying prediction scores are the same.
+### Threshold Comparison Visualization
 
-## Visualizations
+![Threshold comparison](results/threshold_comparison.png)
 
-The notebook contains the model evaluation and explainability visualizations.
+### Confusion Matrix
 
-Recommended figures to include in this repository are:
+The confusion matrix illustrates the distinction between correctly identified fraud, missed fraud, correctly classified legitimate transactions, and false alarms.
 
-1. Confusion matrix at the selected threshold.
-2. Precision–recall curve showing the threshold-selection process.
-3. Model comparison chart.
-4. SHAP feature-importance plot.
+![Confusion matrix](results/confusion_matrix.png)
 
-Once the figures have been saved into a `results/` folder, they can be embedded here using their actual filenames. For example:
+### SHAP Feature Importance
 
-```markdown
-![Confusion Matrix](results/confusion_matrix.png)
+The SHAP visualization helps interpret the influence of input features on the model's predictions.
 
-![SHAP Feature Importance](results/shap_feature_importance.png)
+![SHAP feature importance](results/shap_feature_importance.png)
 
-![Model Comparison](results/model_comparison.png)
-```
-
-These image paths are examples; add them only after the corresponding files have been committed to the repository.
+**Interpretation:** The ensemble provides a useful demonstration of combining multiple architectures and tuning a classification threshold for an imbalanced problem. These results apply to the evaluated dataset split and should not be assumed to generalize directly to future transactions.
 
 ## How to Run
 
 ### Option 1: Google Colab
 
 1. Open `fraud_detection_ensemble.ipynb` in this repository.
-2. Download the notebook or open it in Google Colab.
-3. Download the dataset from Kaggle.
-4. Run the dataset upload cell and select `creditcard.csv`.
+2. Open the notebook in Google Colab.
+3. Download `creditcard.csv` from Kaggle.
+4. Run the dataset upload cell and select the CSV file.
 5. Execute the notebook cells in order.
-6. Review the evaluation metrics, plots, threshold analysis, and SHAP explanations.
+6. Review the model metrics, visualizations, threshold analysis, and SHAP explanations.
 
-### Option 2: Local environment
+### Option 2: Local Environment
 
 Clone the repository:
 
@@ -198,7 +186,7 @@ git clone https://github.com/harshj0207/explainable-fraud-detection.git
 cd explainable-fraud-detection
 ```
 
-Create and activate a virtual environment, then install the dependencies:
+Create and activate a virtual environment:
 
 ```bash
 python -m venv .venv
@@ -222,13 +210,13 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
-Open Jupyter Notebook:
+Launch Jupyter Notebook:
 
 ```bash
 jupyter notebook
 ```
 
-Open `fraud_detection_ensemble.ipynb`, obtain the dataset from Kaggle, and follow the notebook's data-loading instructions.
+Open `fraud_detection_ensemble.ipynb`, download the dataset from Kaggle, and follow the notebook's data-loading instructions.
 
 **Note:** PyTorch and PyTorch Geometric may require environment-specific installation steps. Google Colab is the recommended starting environment for this implementation.
 
@@ -243,30 +231,30 @@ explainable-fraud-detection/
 └── results/
     ├── confusion_matrix.png
     ├── model_comparison.png
-    └── shap_feature_importance.png
+    ├── shap_feature_importance.png
+    └── threshold_comparison.png
 ```
 
-The `results/` directory is optional until you save and upload the figures. The dataset itself should remain outside the repository.
+The dataset is intentionally excluded from the repository.
 
 ## Limitations
 
 - This is a research-inspired implementation, not a verified exact reproduction of every detail in the reference paper.
-- The graph used by the GNN is constructed using nearest neighbors in feature space; it is not a real-world transaction network.
-- The implemented aggregation mechanisms may simplify the formulations and training objectives described in the paper.
-- The meta-learner's training procedure should be reviewed for stacking leakage. Training it on out-of-fold base-model predictions would provide a more rigorous evaluation.
-- Results depend on the dataset split, preprocessing, random seeds, model settings, and decision threshold.
-- SHAP explanations describe model behavior; they do not establish causal relationships.
-- This project is an educational and portfolio implementation, not a production-ready fraud detection system.
+- The GNN uses a nearest-neighbor graph constructed in feature space rather than a real-world transaction network.
+- The aggregation mechanisms may simplify the formulations and training objectives described in the paper.
+- The meta-learner's training procedure should be reviewed for stacking leakage. Out-of-fold predictions would provide a more rigorous stacking evaluation.
+- Performance depends on the data split, preprocessing, random seeds, model settings, and classification threshold.
+- SHAP explanations describe model behavior and do not establish causal relationships.
+- This project is intended for educational and portfolio purposes, not as a production-ready fraud detection system.
 
 ## Future Improvements
 
-- Train the meta-learner using out-of-fold predictions to reduce stacking leakage.
-- Investigate graph construction strategies that better represent transaction relationships.
-- Compare additional class-imbalance techniques and threshold-selection strategies.
-- Evaluate calibration and stability across multiple train/test splits.
-- Add automated experiments and reproducibility controls.
-- Package preprocessing and inference into a reusable prediction pipeline.
-- Evaluate the model on temporally separated data to better simulate deployment.
+- Train the meta-learner using out-of-fold predictions.
+- Explore alternative graph construction strategies.
+- Compare additional class-imbalance and threshold-selection techniques.
+- Evaluate calibration and stability across multiple splits.
+- Test using temporally separated transactions.
+- Package preprocessing and inference into a reusable pipeline.
 
 ## Reference Paper
 
@@ -274,11 +262,11 @@ The `results/` directory is optional until you save and upload the figures. The 
 
 Mehdi Hosseini Chagahi et al.
 
-arXiv preprint, 2024; version 2 dated February 22, 2025.
+arXiv preprint, version 2 dated February 22, 2025.
 
 Paper: https://arxiv.org/abs/2410.09069
 
-This project is an independent, research-inspired implementation of the paper's broad ideas. Implementation details and results may differ from those reported by the authors.
+This repository contains an independent, research-inspired implementation of the paper's broad ideas. Implementation details and results may differ from those reported by the authors.
 
 ## Author
 
